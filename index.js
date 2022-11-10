@@ -69,7 +69,7 @@ async function run(){
       res.send(result);
     })
 
-    app.get('/reviews',async(req, res) => {
+    app.get('/reviews', verifyJWT, async(req, res) => {
       let query = {};
       console.log(req.headers.authorization);
       if(req.query.email){
@@ -94,10 +94,16 @@ async function run(){
       res.send(review);
     })
 
-    app.patch('/update/:id', (req, res) => {
+    app.patch('/update/:id', async(req, res) => {
       const id = req.params.id;
       const updated = req.body;
-      console.log(id, updated);
+      console.log(id, updated)
+      const filter = { _id: ObjectId(id) };
+      const updatedReview = {
+        $set : { massage: updated }
+      }
+      const result = await reviewCollection.updateOne(filter, updatedReview);
+      res.send(result);
     })
 
     app.post('/jwt', verifyJWT, (req, res) => {
