@@ -21,10 +21,11 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 function verifyJWT(req, res, next){
     const authHeader = req.headers.authorization;
     if(!authHeader){
-      res.send({massage: 'unauthorized access'});
+      res.send({massage: "Unauthorized Access"});
     }
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(error, decoded) {
+
+    jwt.verify(token, process.env.ACCESS_TOKEN, function(err, decoded) {
       if(err){
         res.status(401).send(({massage: "Unauthorized Access"}))
       }
@@ -70,14 +71,15 @@ async function run(){
     })
 
     app.get('/reviews', verifyJWT, async(req, res) => {
-      let query = {};
-      console.log(req.headers.authorization);
-      if(req.query.email){
-        query = { userEmail: req.query.email};
+      const verifyEmail = req.decoded.email;
+      if(verifyEmail){
+        let query = {userEmail: verifyEmail};
+        const cursor = reviewCollection.find(query);
+        const reviews = (await cursor.toArray()).reverse();
+        res.send(reviews);
+      } else {
+        res.status(403).send({message: "Forbidden Access"});
       }
-      const cursor = reviewCollection.find(query);
-      const reviews = (await cursor.toArray()).reverse();
-      res.send(reviews);
     })
 
     app.get('/review/:id', async(req, res) => {
@@ -87,6 +89,7 @@ async function run(){
       const reviews = await cursor.toArray();
       res.send(reviews);
     })
+
     app.get('/reviews/:id', async(req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id)};
@@ -94,21 +97,16 @@ async function run(){
       res.send(review);
     })
 
-    app.patch('/update/:id', async(req, res) => {
+ 
+    app.put('/reviews/:id', (req, res) => {
       const id = req.params.id;
-      const updated = req.body;
-      console.log(id, updated)
-      const filter = { _id: ObjectId(id) };
-      const updatedReview = {
-        $set : { massage: updated }
-      }
-      const result = await reviewCollection.updateOne(filter, updatedReview);
-      res.send(result);
+      console.log("tanin rahman", id)
+      res.send("Update is pending");
     })
 
-    app.post('/jwt', verifyJWT, (req, res) => {
+    app.post('/jwt', (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1hr'});
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN, { expiresIn: '1hr'});
       res.send({token});
     })
 
