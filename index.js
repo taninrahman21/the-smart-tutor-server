@@ -98,12 +98,7 @@ async function run(){
       res.send(review);
     })
 
- 
-    app.put('/reviews/:id', (req, res) => {
-      const id = req.params.id;
-      console.log("tanin rahman", id)
-      res.send("Update is pending");
-    })
+
 
     app.post('/jwt', (req, res) => {
       const user = req.body;
