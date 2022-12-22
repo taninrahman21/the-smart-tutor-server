@@ -70,10 +70,11 @@ async function run(){
       res.send(result);
     })
 
-    app.get('/reviews', verifyJWT, async(req, res) => {
-      const verifyEmail = req.decoded.email;
-      if(verifyEmail){
-        let query = {userEmail: verifyEmail};
+    app.get('/reviews', async(req, res) => {
+      // const verifyEmail = req.decoded.email;
+      const email = req.query.email;
+      if(email){
+        let query = {userEmail: email};
         const cursor = reviewCollection.find(query);
         const reviews = (await cursor.toArray()).reverse();
         res.send(reviews);
