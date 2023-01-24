@@ -2,6 +2,7 @@ const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const { query } = require('express');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -98,6 +99,19 @@ async function run(){
       res.send(review);
     })
 
+    app.patch('/update/:id', async(req, res) => {
+      const id = req.params.id;
+      const updateReview = req.body;
+      const query = { _id: ObjectId(id)};
+      const updateDoc = {
+        $set : {
+          massage : updateReview.review
+        }
+      }
+      const result = await reviewCollection.updateOne(query, updateDoc);
+
+      res.send(result);
+    })
 
 
     app.post('/jwt', (req, res) => {
